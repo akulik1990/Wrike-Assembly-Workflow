@@ -10,19 +10,19 @@ function wrikePullout() {
 
   chunkIDs(listOfSubtaskID, "ORR");
 
-  for (taskID in mainTaskObject) {
-    let subtaskObject = mainTaskObject[taskID].orrTask;
-    let subtaskID = subtaskObject.id;
-    let status = idToStatus[subtaskObject.customStatusId];
-    let approval = getApprovals(subtaskID);
-    let oldStatus = wrikeWorkflow[status];
+  for (let taskid in mainTaskObject) {
+    let subtaskobject = mainTaskObject[taskid].orrtask;
+    let subtaskid = subtaskobject.id;
+    let status = idToStatus[subtaskobject.customstatusid];
+    let approval = getApprovals(subtaskid);
+    let oldstatus = wrikeWorkflow[status];
     switch (approval) {
-      case "Approved":
-        moveTask(oldStatus.next, taskID, subtaskID);
+      case "approved":
+        moveTask(oldstatus.next, taskid, subtaskid);
         break;
 
-      case "Rejected":
-        moveTask(oldStatus.prev, taskID, subtaskID);
+      case "rejected":
+        moveTask(oldstatus.prev, taskid, subtaskid);
         break;
 
       default:

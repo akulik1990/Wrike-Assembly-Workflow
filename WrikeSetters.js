@@ -1,13 +1,15 @@
 /**
  * Create subtask in specific task.
- * @param {string} Task ID (where subtask will be added).
- * @param {string} subtask Title.
- * @param {string} Asignee Email.
- * @param {string} task Description (if Applicable).
+ * @param {string} id Task ID (where subtask will be added).
+ * @param {string} title subtask Title.
+ * @param {string} responsible Asignee Email.
+ * @param {string} description task Description (if Applicable).
  * @return response JSON Object as Array.
  */
 function createSubtask(id, title, responsible, description = "") {
   const url = "https://www.wrike.com/api/v4/tasks";
+
+  /** @type {GoogleAppsScript.URL_Fetch.URLFetchRequestOptions} */
   const options = {
     method: "post",
     headers: { Authorization: "Bearer " + WRIKE_TOKEN },
@@ -30,12 +32,14 @@ function createSubtask(id, title, responsible, description = "") {
 //-----------------------------------------------------------------------------------------------------
 /**
  * Change Task Status.
- * @param {string} Task ID.
- * @param {string} Status ID.
+ * @param {string} id Task ID.
+ * @param {string} statusID Status ID.
  * @return response JSON Object as Array.
  */
 function changeStatus(id, statusID) {
   let url = "https://www.wrike.com/api/v4/tasks/" + id;
+
+  /** @type {GoogleAppsScript.URL_Fetch.URLFetchRequestOptions} */
   const options = {
     method: "put",
     headers: { Authorization: "Bearer " + WRIKE_TOKEN },
@@ -54,20 +58,19 @@ function changeStatus(id, statusID) {
 //-----------------------------------------------------------------------------------------------------
 /**
  * Create Approval on task.
- * @param {string} Task ID.
- * @param {string} Approval Description (title).
- * @param {string} Approver Email.
+ * @param {string} id Task ID.
+ * @param {string} responsible Approver Email.
  * @return response JSON Object as Array.
  */
-function createApproval(id, description, responsible) {
+function createApproval(id, responsible) {
   const url = `https://www.wrike.com/api/v4/tasks/${id}/approvals`;
+
+  /** @type {GoogleAppsScript.URL_Fetch.URLFetchRequestOptions} */
   const options = {
     method: "post",
     headers: { Authorization: "Bearer " + WRIKE_TOKEN },
     payload: {
-      description: description,
       approvers: JSON.stringify([users[responsible].id]),
-      dueDate: dEnd,
     },
     muteHttpExceptions: true,
   };

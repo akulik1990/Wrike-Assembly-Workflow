@@ -3,6 +3,8 @@
  */
 function getContactIdV4InObj() {
   var url = "https://www.wrike.com/api/v4/contacts";
+
+  /** @type {GoogleAppsScript.URL_Fetch.URLFetchRequestOptions} */
   var options = {
     method: "get",
     headers: { Authorization: "Bearer " + WRIKE_TOKEN },
@@ -28,17 +30,18 @@ function getContactIdV4InObj() {
 //-----------------------------------------------------------------------------------------------------
 /**
  * Get list of Wrike Tasks from Folder.
- * @param {string} Input the folderID.
+ * @param {string} WRIKE_FOLDER_ID Input the folderID.
  * @return Array of Objects with tasks from folder.
  */
 function getWrikeTasks(WRIKE_FOLDER_ID) {
   const url =
     "https://www.wrike.com/api/v4/folders/" + WRIKE_FOLDER_ID + "/tasks";
 
+  /** @type {GoogleAppsScript.URL_Fetch.URLFetchRequestOptions} */
   const options = {
     method: "get",
     headers: { authorization: "bearer " + WRIKE_TOKEN },
-    mutehttpexceptions: true,
+    muteHttpExceptions: true,
   };
 
   const response = UrlFetchApp.fetch(url, options);
@@ -50,10 +53,13 @@ function getWrikeTasks(WRIKE_FOLDER_ID) {
 //-----------------------------------------------------------------------------------------------------
 /**
  * Get Task details for 100 tasks.
- * @param {Array} list of task ID's.
+ * @param {Array} listOfIDs list of task ID's.
+ * @param {string} category Main task or ODD subtask
  */
-function getTaskDetails(listOfIDs, type) {
+function getTaskDetails(listOfIDs, category) {
   const url = "https://www.wrike.com/api/v4/tasks/" + listOfIDs;
+
+  /** @type {GoogleAppsScript.URL_Fetch.URLFetchRequestOptions} */
   const options = {
     method: "get",
     headers: { Authorization: "Bearer " + WRIKE_TOKEN },
@@ -66,7 +72,7 @@ function getTaskDetails(listOfIDs, type) {
   for (let i = 0; i < data.data.length; i++) {
     let status = idToStatus[data.data[i].customStatusId];
 
-    if (type === "Main") {
+    if (category === "Main") {
       switch (status) {
         case "Complete":
           break;
@@ -88,7 +94,7 @@ function getTaskDetails(listOfIDs, type) {
           listOfSubtaskID.push(mainTaskObject[data.data[i].id]["ORR Task ID"]);
           break;
       }
-    } else if (type === "ORR") {
+    } else if (category === "ORR") {
       mainTaskObject[data.data[i].superTaskIds[0]].orrTask = flattenObject(
         data.data[i],
       );
@@ -101,11 +107,13 @@ function getTaskDetails(listOfIDs, type) {
 //-----------------------------------------------------------------------------------------------------
 /**
  * Get Task Approvals.
- * @param {Array} task ID.
+ * @param {Array} taskID
  * @return JSON Object with Task Approvals.
  */
 function getApprovals(taskID) {
   const url = "https://www.wrike.com/api/v4/tasks/" + taskID + "/approvals";
+
+  /** @type {GoogleAppsScript.URL_Fetch.URLFetchRequestOptions} */
   const options = {
     method: "get",
     headers: { Authorization: "Bearer " + WRIKE_TOKEN },
@@ -116,5 +124,5 @@ function getApprovals(taskID) {
   const approvals = JSON.parse(response.getContentText());
   const latestApp = approvals.data[0];
 
-  return [latestApp.decisions[0].status];
+  return latestApp.decisions[0].status;
 }

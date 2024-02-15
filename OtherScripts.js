@@ -1,20 +1,20 @@
 /**
  * Get details of each task. Running chunks of 100 at a time due to API limitations.
- * @param {string} List of ID's to be pulled (limit 100).
- * @param {string} Type of pull (Main or ORR).
+ * @param {Array} IDs List of ID's to be pulled (limit 100).
+ * @param {string} category Type of pull (Main or ORR).
  */
-function chunkIDs(IDs, type) {
+function chunkIDs(IDs, category) {
   let listOfIDs = [];
-  for (var i in IDs) {
+  for (let i = 0; i < IDs.length; i++) {
     if (i % 100 == 0) {
-      getTaskDetails(listOfIDs, type);
+      getTaskDetails(listOfIDs, category);
       listOfIDs = [IDs[i]];
     } else {
       listOfIDs.push(IDs[i]);
     }
   }
   if (listOfIDs.length > 0) {
-    getTaskDetails(listOfIDs, type);
+    getTaskDetails(listOfIDs, category);
   }
 
   return;
@@ -23,7 +23,7 @@ function chunkIDs(IDs, type) {
 //-------------------------------------------------------------------------
 /**
  * Flattens a multinested JSON object in to single level.
- * @param {object} Input the object to flatten.
+ * @param {object} ob Input the object to flatten.
  * @return Single level object.
  */
 function flattenObject(ob) {
@@ -33,13 +33,13 @@ function flattenObject(ob) {
       if (Array.isArray(ob[i])) {
         if (typeof ob[i][0] === "object") {
           Object.keys(ob[i]).forEach(function (key) {
-            result[filedsMap[ob[i][key].id]] = ob[i][key].value;
+            result[fieldsMap[ob[i][key].id]] = ob[i][key].value;
           });
         } else {
           result[i] = ob[i];
         }
       } else {
-        const temp = flattenObject(ob[i], filedsMap);
+        const temp = flattenObject(ob[i]);
         for (const j in temp) {
           result[j] = temp[j];
         }
@@ -54,7 +54,7 @@ function flattenObject(ob) {
 //-------------------------------------------------------------------------
 /**
  * Swap Object Keys with Values.
- * @param {object} Input the object to swap.
+ * @param {object} json Input the object to swap.
  * @return Swapped object.
  */
 function swap(json) {
@@ -68,8 +68,8 @@ function swap(json) {
 //-------------------------------------------------------------------------
 /**
  * Get Approver Email from task object and approver title.
- * @param {string} Input taskID.
- * @param {string} Input approver title.
+ * @param {string} taskID Input taskID.
+ * @param {string} title Input approver title.
  * @return email.
  */
 function getEmailFromTitle(taskID, title) {
@@ -96,15 +96,15 @@ function getEmailFromTitle(taskID, title) {
 //-------------------------------------------------------------------------
 /**
  * Change task status and set approval if required. Change main task status if required.
- * @param {string} Input new status title.
- * @param {string} Input main task ID.
- * @param {string} Input subtask ID.
+ * @param {string} newStatus Input new status title.
+ * @param {string} taskID Input main task ID.
+ * @param {string} subtaskID Input subtask ID.
  */
 function moveTask(newStatus, taskID, subtaskID) {
   changeStatus(subtaskID, statusToID[newStatus]);
   let statusObj = wrikeWorkflow[newStatus];
   if (statusObj.Approver) {
-    createApproval(subtaskID, getEmailFromTitle(statusObj.Approver));
+    createApproval(subtaskID, getEmailFromTitle(subtaskID, statusObj.Approver));
   }
   if (statusObj.main) {
     changeStatus(taskID, statusToID[statusObj.main]);
@@ -116,7 +116,7 @@ function moveTask(newStatus, taskID, subtaskID) {
 //-------------------------------------------------------------------------
 /**
  * Get google file ID from URL.
- * @param {string} Input the url to extract ID.
+ * @param {string} url Input the url to extract ID.
  * @return ID.
  */
 function getIdFromUrl(url) {
