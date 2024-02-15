@@ -25,6 +25,7 @@ const statusToID = {
   Status2: "ID",
 };
 var idToStatus = {};
+const fieldsMap = {};
 
 const wrikeWorkflow = {
   "Generate ORR": {
